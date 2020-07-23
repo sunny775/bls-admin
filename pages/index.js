@@ -2,13 +2,12 @@ import { useEffect } from "react";
 import Head from "next/head";
 import SignIn from "../components/SignIn";
 import useAuth from "../hooks/auth";
-import Dashboard from "./dashboard";
 import Router from "next/router";
+import {NavBar} from '../components/NavBar'
 
 export default function Home() {
   const { error, data, email, signOut } = useAuth();
   const uid = data && data.uid;
-  //uid && Router.push("/dashboard");
   const goToDashboard = () => Router.push('/dashboard');
 
   return (
@@ -18,8 +17,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-      <button className='btn btn-info logout' onClick={()=>signOut()}>&#10061; logout</button>
-        <h2 className="title">Bls Admin</h2>
+        <NavBar signOut={signOut} uid={uid} error={error} />
         {!data ? (
           <div>Loading...</div>
         ) : error ? (
@@ -76,14 +74,6 @@ export default function Home() {
           margin-left: 0.5rem;
         }
 
-        .title {
-          margin: 0;
-          line-height: 1.15;
-        }
-
-        .title {
-          text-align: center;
-        }
         .error {
           color: #ff5252;
           font-size: 0.9em;
@@ -93,11 +83,9 @@ export default function Home() {
         .sign-in {
           display: ${uid ? "none" : "block"};
         }
-        .logout{
-          position: fixed;
-          top:15px;
-          right: 15px;
-          display: ${uid || error ? 'block' : 'none'}
+
+        .btn.btn-success{
+          padding: 2px 10px;
         }
       `}</style>
 

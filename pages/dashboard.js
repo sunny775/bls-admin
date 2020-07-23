@@ -3,22 +3,18 @@ import Head from 'next/head'
 import cookies from 'next-cookies'
 import axios from 'axios'
 import Link from 'next/link'
-import config from '../config/system'
 import useAuth from '../hooks/auth'
+import {NavBar} from '../components/NavBar'
 
 export default function Dashboard() {
-  const {signOut, data} = useAuth();
+  const {signOut, data, error} = useAuth();
 
   useEffect(() => {
     console.log('data')
   }, [])
   const uid = data && data.uid;
 
-  /*if(!result.decodedToken){
-    return <div style={{width: '100vw', height:'100vh', display: 'flex', justifyContent:'center', alignItems:'center'}}><button className='btn btn-danger'>Unauthorised access denied!</button></div>
-  }*/
   const emojis = ['😂','😃']
-  const color = 'blue'
   
   return (
     <div className="container">
@@ -28,24 +24,19 @@ export default function Dashboard() {
       </Head>
 
       <main>
+      <NavBar signOut={signOut} uid={uid} error={error} />
+
         { !data ? <div>Loading...</div> : (data && !data.uid) ? <div className="error">
           Unauthorized access <Link href='/'><a>Login</a></Link>
         </div> : null}
 
         <div className='authorized'>
-        <p className="description shadow-sm">
+        <p className="description">
           {data && `Welcome ${data.name}`}
         </p>
-        <button className='btn btn-info logout' onClick={()=>signOut()}>&#10061; logout</button>
+       
 
         <div className="grid">
-          <Link href='/admins'>
-          <a className="card shadow-sm">
-            <h3>Admins &rarr;</h3>
-            <p>Add and remove admin user for Betterlife Savings</p>
-          </a>
-          </Link>
-
           <Link href='/users'>
           <a className="card shadow-sm">
             <h3>Clients &rarr;</h3>
@@ -63,6 +54,12 @@ export default function Dashboard() {
           <a className="card shadow-sm">
             <h3>Broadcast &rarr;</h3>
             <p>Send a broadcast message to all registered users</p>
+          </a>
+          </Link>
+          <Link href='/blog'>
+          <a className="card shadow-sm">
+            <h3>Blog &rarr;</h3>
+            <p>Manage blog page. Post or delete blog articles</p>
           </a>
           </Link>
         </div>
@@ -146,7 +143,6 @@ export default function Dashboard() {
         .description {
           line-height: 1.5;
           font-size: 1.5rem;
-          background: #fafafa;
           padding: 5px 20px;
           border-radius: 10px;
           margin-top: 2.5em;
