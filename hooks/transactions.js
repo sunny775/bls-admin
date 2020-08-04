@@ -51,7 +51,10 @@ function useTransactions() {
 
   const UpdateTransactionStatus = (owner, details) => {
     const oldBalance = acctBal || owner.accountBalance || 0;
-    const newBalance = parseFloat(oldBalance) + parseFloat(details.amount);
+    const newBalance =
+      details.type === "deposit"
+        ? parseFloat(oldBalance) + parseFloat(details.amount)
+        : parseFloat(oldBalance) - parseFloat(details.amount);
     setTransLoading(true);
     db.collection("transactions")
       .doc(details.id)
