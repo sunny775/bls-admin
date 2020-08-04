@@ -55,6 +55,7 @@ function useTransactions() {
       details.type === "deposit"
         ? parseFloat(oldBalance) + parseFloat(details.amount)
         : parseFloat(oldBalance) - parseFloat(details.amount);
+    if(newBalance < 0) return;
     setTransLoading(true);
     db.collection("transactions")
       .doc(details.id)
@@ -96,6 +97,7 @@ function useTransactions() {
       details.type === "deposit"
         ? parseFloat(oldBalance) + parseFloat(details.amount)
         : parseFloat(oldBalance) - parseFloat(details.amount);
+    if(newBalance < 0) return;
     setTransLoading(true);
     db.collection("transactions")
       .add({
