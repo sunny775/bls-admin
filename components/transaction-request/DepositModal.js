@@ -2,43 +2,40 @@ import React from "react";
 import { Modal } from "react-bootstrap";
 import Owner from "./owner";
 import Form from "./Form";
-import styled from "styled-components";
-import { AuthContext } from "../../context/authContext";
 
-const Header = styled(Modal.Header)`
-  background: #2e7d32;
-  color: white;
-  letter-spacing: 2px;
-`;
-export default () => {
-  const {
-    userDetails,
-    depositOpen,
-    hideDeposit,
-    adminDevices,
-    postTransaction,
-    transLoading,
-  } = React.useContext(AuthContext);
-
+export default ({
+  user,
+  depositOpen,
+  hideDeposit,
+  postTransaction,
+  transLoading,
+}) => {
   const handleClose = () => hideDeposit();
 
+  const styles = {
+    header: {
+      background: "#2e7d32 !important",
+      letterSpacing: "2px",
+    },
+  };
   return (
     <Modal centered show={depositOpen} onHide={handleClose}>
-      <Header closeButton>
+      <Modal.Header style={styles.header} closeButton>
         <p>
-          Fill the form below to create a deposit request.
+          A deposit request initiated by the admin will
           <br />
-          Our agents will contact you on further steps
+          automatically assume the status of approved
         </p>
-      </Header>
-      <Owner data={userDetails} />
-      <Form
-        owner={userDetails}
-        adminDevices={adminDevices}
-        postTransaction={postTransaction}
-        loading={transLoading}
-        type="deposit"
-      />
+      </Modal.Header>
+      <Modal.Body>
+        <Owner data={user} />
+        <Form
+          owner={user}
+          postTransaction={postTransaction}
+          loading={transLoading}
+          type="deposit"
+        />
+      </Modal.Body>
     </Modal>
   );
 };

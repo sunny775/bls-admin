@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <div className="container">
       <Head>
-        <title>Create Next App</title>
+        <title>Better Life Savings / Admin</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
@@ -50,6 +50,7 @@ export default function Home() {
           flex-direction: column;
           justify-content: center;
           align-items: center;
+          font-family: 'Roboto', sans-serif;
         }
 
         main {

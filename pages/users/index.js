@@ -3,9 +3,9 @@ import Head from 'next/head'
 import cookies from 'next-cookies'
 import axios from 'axios'
 import Link from 'next/link'
-import useAuth from '../hooks/auth'
+import useAuth from '../../hooks/auth'
 // import useGetUsers from '../hooks/users'
-import {NavBar} from '../components/NavBar'
+import {NavBar} from '../../components/NavBar'
 
 export default function Users() {
   const {signOut, data, error, users} = useAuth();
@@ -31,12 +31,25 @@ export default function Users() {
 
         <div className='authorized'>
         <p className="description">
-          Blog
+          Users
         </p>
        
 
         <div className="users">
-          <h1>Page building in progress</h1>
+          {users && users.filter(e=>e.city).map(user=>(
+              <Link href={`/users/${user.uid}`} key={user.uid}>
+              <a className="card shadow-sm">
+                  <div className='user-image'>
+                      <img src={user.url} alt={user.displayName} className='rounded-circle' height={50}/>
+                  </div>
+                 <div className='card-items row'>
+                 <div className='card-item col-sm-4'>{user.displayName}</div>
+                 <div className='card-item col-sm-4'>{user.phoneNumber}</div>
+                 <div className='card-item col-sm-4'>{`${user.city} ${user.state}`}</div>
+                 </div>
+              </a>
+              </Link>
+          ))}
         </div>
         </div>
       </main>
@@ -55,6 +68,7 @@ export default function Users() {
           flex-direction: column;
           justify-content: center;
           align-items: center;
+          font-family: 'Roboto', sans-serif;
         }
 
         main {

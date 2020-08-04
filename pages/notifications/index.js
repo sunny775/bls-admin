@@ -3,11 +3,14 @@ import Head from 'next/head'
 import cookies from 'next-cookies'
 import axios from 'axios'
 import Link from 'next/link'
-import useAuth from '../hooks/auth'
-import {NavBar} from '../components/NavBar'
+import useAuth from '../../hooks/auth'
+// import useGetUsers from '../hooks/users'
+import {NavBar} from '../../components/NavBar'
 
-export default function Transactions() {
-  const {signOut, data, error, transactions} = useAuth();
+export default function Users() {
+  const {signOut, data, error, users} = useAuth();
+  //const {users} = useGetUsers();
+  console.log('users:',users)
 
   const uid = data && data.uid;
 
@@ -28,27 +31,12 @@ export default function Transactions() {
 
         <div className='authorized'>
         <p className="description">
-          Transactions
+          Broadcast messages
         </p>
        
 
         <div className="users">
-          {transactions && transactions.reverse().map((e,i)=>(
-              <Link href={`/transactions/${e.id}`} key={e.owner+i}>
-              <a className="row shadow-sm transaction-card">
-                  <div className='col-sm-6 details'>
-                      <div>{new Date(e.date).toDateString()}</div>
-                      <div>Owner: <strong>{e.ownerDetails.name}</strong></div>
-                      <div>Location: <strong>{e.ownerDetails.city}</strong></div>
-                  </div>
-                 <div className='col-sm-6 details'>
-                 <div>Type: <strong>{e.type}</strong></div>
-                 <div>Amount: <strong>&#8358;{e.amount}</strong></div>
-                 <div>status: <span className={`badge ${e.status == 'requested' ? 'badge-secondary': 'badge-success'}`}>{e.status}</span></div>
-                 </div>
-              </a>
-              </Link>
-          ))}
+          <h1>Page building in progress</h1>
         </div>
         </div>
       </main>
@@ -77,11 +65,24 @@ export default function Transactions() {
           justify-content: center;
           align-items: center;
         }
-        
+        .authorized{
+          display: block;
+        }
+
         footer {
           width: 100%;
           height: 100px;
           border-top: 1px solid #eaeaea;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        footer img {
+          margin-left: 0.5rem;
+        }
+
+        footer a {
           display: flex;
           justify-content: center;
           align-items: center;
@@ -126,25 +127,44 @@ export default function Transactions() {
           display: ${data && data.uid ? 'block' : 'none'}
         }
 
-        .transaction-card {
-           width: 100%;
-           margin: 30px 0;
-           padding: 20px;
-           border: 1px solid #eaeaea;
+        .card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 90vw;
+            margin-top: 3rem;
+          padding: 1rem;
+          text-align: left;
+          color: inherit;
+          text-decoration: none;
+          border-radius: 10px;
+          transition: color 0.15s ease, border-color 0.15s ease;
+        }
+        .user-image{
+            flex-basis: 10%;
+        }
+        .card-items{
+          flex-basis: 90%;
+          text-align: left;
+          color: inherit;
+        }
+        .card-item{
+            padding: 10px;
+            text-transform: capitalize;
         }
         
-        .details div{
-            margin: 10px 0;
-            letter-spacing: 1px;
-        }
-        
-        .transaction-card:hover,
-        .transaction-card:focus,
-        .transaction-card:active {
+        .card:hover,
+        .card:focus,
+        .card:active {
           color: #0070f3;
           border-color: #0070f3;
         }
-        
+
+        .logo {
+          height: 1em;
+        }
         .logout{
           position: fixed;
           top:15px;

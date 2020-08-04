@@ -80,6 +80,7 @@ export default function Dashboard() {
           flex-direction: column;
           justify-content: center;
           align-items: center;
+          font-family: 'Roboto', sans-serif;
         }
 
         main {

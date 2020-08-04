@@ -3,9 +3,9 @@ import Head from 'next/head'
 import cookies from 'next-cookies'
 import axios from 'axios'
 import Link from 'next/link'
-import useAuth from '../hooks/auth'
+import useAuth from '../../hooks/auth'
 // import useGetUsers from '../hooks/users'
-import {NavBar} from '../components/NavBar'
+import {NavBar} from '../../components/NavBar'
 
 export default function Users() {
   const {signOut, data, error, users} = useAuth();
@@ -31,7 +31,7 @@ export default function Users() {
 
         <div className='authorized'>
         <p className="description">
-          Broadcast messages
+          Blog
         </p>
        
 

@@ -6,7 +6,7 @@ function useAuth() {
   const [error, setError] = useState(null);
   const [email, setEmail] = useState(null);
   const [users, setUsers] = useState(null);
-  const [transactions, setTransactions] = useState(null)
+  const [transactions, setTransactions] = useState(null);
 
   const { auth, db } = app;
   const user = auth.currentUser;
@@ -22,35 +22,35 @@ function useAuth() {
             .doc(uid)
             .get()
             .then((doc) => doc.data());
-          
+
           const users = await db
             .collection("users")
             .get()
-            .then(queryResult=>{
-              const users = []
+            .then((queryResult) => {
+              const users = [];
               queryResult.forEach((doc) => {
                 users.push({ id: doc.id, ...doc.data() });
               });
-              console.log(users)
-              return users
+              console.log(users);
+              return users;
             });
 
-            const transactions = await db
+          const transactions = await db
             .collection("transactions")
-            .orderBy('date')
+            .orderBy("date")
             .get()
-            .then(queryResult=>{
-              const transactions = []
+            .then((queryResult) => {
+              const transactions = [];
               queryResult.forEach((doc) => {
                 transactions.push({ id: doc.id, ...doc.data() });
               });
-              return transactions
+              return transactions;
             });
 
-            setError(null);
-            setData({ isAuth: !!data, ...data });
-            setUsers(users)
-            setTransactions(transactions)
+          setError(null);
+          setData({ isAuth: !!data, ...data });
+          setUsers(users);
+          setTransactions(transactions);
         } catch (error) {
           setEmail(user.email);
           setError(error);
@@ -78,13 +78,25 @@ function useAuth() {
         console.log("error");
       });
 
+  const getSingleTransaction = async (id) => {
+    const transactions = await db
+      .collection("transactions")
+      .doc(id)
+      .get()
+      .then((doc) => {
+        return { id: doc.id, ...doc.data() };
+      });
+    return transactions;
+  };
+
   return {
     data,
     email,
     error,
     users,
     signOut,
-    transactions
+    transactions,
+    getSingleTransaction
   };
 }
 

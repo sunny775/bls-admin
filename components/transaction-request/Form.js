@@ -1,14 +1,13 @@
 import React from "react";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { Form, Button } from "react-bootstrap";
-import styled from "styled-components";
+import { Form } from "react-bootstrap";
 import { SubmitBtn } from "../SubmitBtn";
 
 const schema = yup.object({
   amount: yup
     .number()
-    .moreThan(199, "*Minimum of ₦200 can be saved per deposit request")
+    .moreThan(199, "*Minimum of ₦200 is allowed per transaction request")
     .lessThan(
       1000001,
       "*Current maximum saving limit per deposit request is ₦1M"
@@ -17,20 +16,16 @@ const schema = yup.object({
   message: yup.string().min(30, "*Message is too short"),
 });
 
-const Div = styled.div`
-  padding: 30px;
-`;
 
-export default ({ owner, adminDevices, postTransaction, loading, type }) => {
+export default ({ owner, postTransaction, loading, type }) => {
 
   return (
     <Formik
       validationSchema={schema}
       onSubmit={(value) =>
         postTransaction({
-          details: { ...value, status: "requested", type },
+          details: { ...value, type },
           owner,
-          adminDevices,
         })
       }
       initialValues={{
@@ -39,7 +34,7 @@ export default ({ owner, adminDevices, postTransaction, loading, type }) => {
       }}
     >
       {({ getFieldProps, touched, errors, handleSubmit }) => (
-        <Div>
+        <div style={{padding: '30px 0'}}>
           <Form noValidate onSubmit={handleSubmit}>
             <Form.Group controlId="amount">
               <Form.Control
@@ -68,9 +63,9 @@ export default ({ owner, adminDevices, postTransaction, loading, type }) => {
               </Form.Control.Feedback>
             </Form.Group>
 
-            <SubmitBtn loading={loading} text="Create request" />
+            <SubmitBtn loading={loading}>Create transaction</SubmitBtn>
           </Form>
-        </Div>
+        </div>
       )}
     </Formik>
   );
