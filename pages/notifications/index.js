@@ -1,49 +1,115 @@
-import {useEffect} from 'react'
-import Head from 'next/head'
-import cookies from 'next-cookies'
-import axios from 'axios'
-import Link from 'next/link'
-import useAuth from '../../hooks/auth'
-// import useGetUsers from '../hooks/users'
-import {NavBar} from '../../components/NavBar'
+import { useEffect, useState } from "react";
+import Head from "next/head";
+import Link from "next/link";
+import { Image, Button } from "react-bootstrap";
+import InfiniteScroll from "react-infinite-scroll-component";
+import useAuth from "../../hooks/auth";
+import useMessages from "../../hooks/messages";
+import { NavBar } from "../../components/NavBar";
 
-export default function Users() {
-  const {signOut, data, error, users} = useAuth();
-  //const {users} = useGetUsers();
-  console.log('users:',users)
+export default function Transactions() {
+  const [messages, setMessages] = useState([]);
+  const { signOut, data, error } = useAuth();
+  const { getAllMessages, hasMore } = useMessages();
+  useEffect(() => {
+    data && data.uid && getAllMessages().then((res) => setMessages(res));
+  }, [data]);
 
+  console.log("message-update:", messages);
+  console.log(hasMore);
+  const next = () => {
+    getAllMessages().then((res) => setMessages([...messages, ...res]));
+  };
   const uid = data && data.uid;
 
-  
   return (
     <div className="container">
       <Head>
-        <title>BetterLifesavings admin dashboard</title>
+        <title>BetterLifesavings admin dashboard / messages</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main>
-      <NavBar signOut={signOut} uid={uid} error={error} />
+        <NavBar signOut={signOut} uid={uid} error={error} />
 
-        { !data ? <div>Loading...</div> : (data && !data.uid) ? <div className="error">
-          Unauthorized access <Link href='/'><a>Login</a></Link>
-        </div> : null}
+        {!data ? (
+          <div>Loading...</div>
+        ) : data && !data.uid ? (
+          <div className="error">
+            Unauthorized access{" "}
+            <Link href="/">
+              <a>Login</a>
+            </Link>
+          </div>
+        ) : null}
 
-        <div className='authorized'>
-        <p className="description">
-          Broadcast messages
-        </p>
-       
+        <div className="authorized">
+          <p className="description">Messages from clients</p>
 
-        <div className="users">
-          <h1>Page building in progress</h1>
-        </div>
+          <div className="users">
+            <InfiniteScroll
+              dataLength={messages.length}
+              next={next}
+              hasMore={hasMore}
+              loader={<h4 style={{ textAlign: "center" }}>Loading...</h4>}
+              endMessage={
+                <p style={{ textAlign: "center" }}>
+                  <b>You have seen it all</b>
+                </p>
+              }
+            >
+              {messages.map((e, i) => (
+                <div key={e.id}>
+                  <div className="row shadow-sm transaction-card">
+                    <div className="col-sm-6 details">
+                      <div>{new Date(e.date).toDateString()}</div>
+                      <div>
+                        Sender: <strong>{e.senderInfo.displayName}</strong>
+                      </div>
+                      <Image src={e.senderInfo.url} thumbnail width={60} />
+                      <div>
+                        Location: <strong>{e.senderInfo.city}</strong>
+                      </div>
+                    </div>
+                    <div className="col-sm-6 details">
+                      <div>
+                        Subject: <strong>{e.subject}</strong>
+                      </div>
+                      <div>
+                        Message: <strong>{e.message}</strong>
+                      </div>
+                      <div>
+                        status:{" "}
+                        <Link href={`/notifications/${e.id}`}>
+                          <a
+                            className={`status badge ${
+                              e.status ? "badge-success" : "badge-secondary"
+                            }`}
+                          >
+                            {e.status || "unresolved"}
+                          </a>
+                        </Link>
+                      </div>
+                      <div>
+                        <Link href={`/notifications/${e.id}`}>
+                          <a className="badge badge-info">
+                            {e.replies && e.replies.length}
+                            <i className="material-icons">reply</i>
+                          </a>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </InfiniteScroll>
+          </div>
         </div>
       </main>
 
       <footer>
-      <div>
-        © BetterlifeSavings {new Date().getFullYear()}. All rights reserved.
+        <div>
+          © BetterlifeSavings {new Date().getFullYear()}. All rights reserved.
         </div>
       </footer>
 
@@ -55,6 +121,7 @@ export default function Users() {
           flex-direction: column;
           justify-content: center;
           align-items: center;
+          font-family: "Roboto", sans-serif;
         }
 
         main {
@@ -64,9 +131,6 @@ export default function Users() {
           flex-direction: column;
           justify-content: center;
           align-items: center;
-        }
-        .authorized{
-          display: block;
         }
 
         footer {
@@ -78,22 +142,12 @@ export default function Users() {
           align-items: center;
         }
 
-        footer img {
-          margin-left: 0.5rem;
-        }
-
-        footer a {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
         a {
           color: inherit;
           text-decoration: none;
         }
 
-        .error a{
+        .error a {
           background: #bbdefb;
           padding: 10px 20px;
           marging: 15px;
@@ -103,7 +157,7 @@ export default function Users() {
 
         .error {
           line-height: 1.15;
-          color: #ff5252 ;
+          color: #ff5252;
           border: 1px solid #ff8a80;
           padding: 1.5rem;
           border-radius: 10px;
@@ -123,52 +177,39 @@ export default function Users() {
           margin-top: 2.5em;
         }
 
-        .authorized{
-          display: ${data && data.uid ? 'block' : 'none'}
+        .authorized {
+          display: ${data && data.uid ? "block" : "none"};
         }
 
-        .card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-direction: row;
-            flex-wrap: wrap;
-            width: 90vw;
-            margin-top: 3rem;
-          padding: 1rem;
-          text-align: left;
-          color: inherit;
-          text-decoration: none;
-          border-radius: 10px;
-          transition: color 0.15s ease, border-color 0.15s ease;
+        .transaction-card {
+          width: 100%;
+          margin: 30px 0;
+          padding: 20px;
+          border: 1px solid #eaeaea;
         }
-        .user-image{
-            flex-basis: 10%;
+
+        .details div {
+          margin: 10px 0;
+          letter-spacing: 1px;
         }
-        .card-items{
-          flex-basis: 90%;
-          text-align: left;
-          color: inherit;
-        }
-        .card-item{
-            padding: 10px;
-            text-transform: capitalize;
-        }
-        
-        .card:hover,
-        .card:focus,
-        .card:active {
+
+        .transaction-card:hover,
+        .transaction-card:focus,
+        .transaction-card:active {
           color: #0070f3;
-          border-color: #0070f3;
         }
 
-        .logo {
-          height: 1em;
-        }
-        .logout{
+        .logout {
           position: fixed;
-          top:15px;
+          top: 15px;
           right: 15px;
+        }
+        .badge.badge-info {
+          color: white;
+        }
+        .status.badge {
+          cursor: pointer;
+          color: white;
         }
 
         @media (max-width: 600px) {
@@ -176,18 +217,18 @@ export default function Users() {
             width: 100%;
             flex-direction: column;
           }
-          @media(max-width: 576px){
-              .card-items{
-                  padding-left: 20px;
-              }
-              .card{
-                  width: 70vw;
-              }
+          @media (max-width: 576px) {
+            .card-items {
+              padding-left: 20px;
+            }
+            .card {
+              width: 70vw;
+            }
           }
         }
       `}</style>
     </div>
-  )
+  );
 }
 
 /*export async function getStaticProps(context) {
@@ -205,4 +246,3 @@ export default function Users() {
     }
 
 }*/
-

@@ -7,6 +7,7 @@ function useAuth() {
   const [email, setEmail] = useState(null);
   const [users, setUsers] = useState(null);
   const [transactions, setTransactions] = useState(null);
+  const [messages, setMessages] = useState(null);
 
   const { auth, db } = app;
   const user = auth.currentUser;
@@ -47,10 +48,23 @@ function useAuth() {
               return transactions;
             });
 
+            const messages = await db
+            .collection("messages")
+            .orderBy("date")
+            .get()
+            .then((queryResult) => {
+              const messages = [];
+              queryResult.forEach((doc) => {
+                messages.push({ id: doc.id, ...doc.data() });
+              });
+              return messages;
+            });
+
           setError(null);
           setData({ isAuth: !!data, ...data });
           setUsers(users);
           setTransactions(transactions);
+          setMessages(messages)
         } catch (error) {
           setEmail(user.email);
           setError(error);
@@ -61,6 +75,7 @@ function useAuth() {
         setError(null);
         setUsers(null);
         setTransactions(null);
+        setMessages(null);
       }
     });
     return unregisterAuthObserver;
@@ -96,6 +111,7 @@ function useAuth() {
     users,
     signOut,
     transactions,
+    messages,
     getSingleTransaction
   };
 }

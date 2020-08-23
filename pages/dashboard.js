@@ -52,8 +52,8 @@ export default function Dashboard() {
           </Link>
           <Link href='/notifications'>
           <a className="card shadow-sm">
-            <h3>Broadcast &rarr;</h3>
-            <p>Send a broadcast message to all registered users</p>
+            <h3>Messages &rarr;</h3>
+            <p>Manage and reply messages sent by registered users</p>
           </a>
           </Link>
           <Link href='/blog'>
