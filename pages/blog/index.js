@@ -3,6 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { Image, Button } from "react-bootstrap";
 import InfiniteScroll from "react-infinite-scroll-component";
+import Markdown from "markdown-to-jsx";
 import useAuth from "../../hooks/auth";
 import useBlog from "../../hooks/blog";
 import { NavBar } from "../../components/NavBar";
@@ -78,10 +79,7 @@ export default function Transactions() {
                         Author: <strong>{e.author}</strong>
                       </div>
                       <h3>{e.title}</h3>
-                      <div>
-                        {e.img && <Image src={e.img} thumbnail width={60} />}
-                      </div>
-                      <div>{e.body}</div>
+                      <Markdown className="markdown">{e.body}</Markdown>
                       <div>
                         <Link href={`/blog/${e.id}`}>
                           <a className="edit-btn badge">
@@ -219,6 +217,18 @@ export default function Transactions() {
         .delete-btn:hover,
         .delete-btn:focus {
           color: red;
+        }
+
+        .markdownstyles a {
+          color: #1a0dab;
+        }
+        .markdownstyles a:visited {
+          color: #609;
+        }
+
+        .markdownstyles img {
+          padding-top: 1rem;
+          width: 60%;
         }
 
         @media (max-width: 600px) {
