@@ -117,7 +117,7 @@ export const CreatePost = ({ createPost, loading, post, id }) => {
                 </div>
               ) : null}
             </div>
-            <SubmitBtn loading={loading}>post</SubmitBtn>
+            <SubmitBtn loading={loading}>{post ? "update" : "post"}</SubmitBtn>
           </Form>
         </div>
       )}

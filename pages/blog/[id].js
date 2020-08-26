@@ -42,7 +42,7 @@ export default function EditPost({post}) {
         ) : null}
 
         <div className="authorized">
-          <p className="description">Create New Blog Post</p>
+          <p className="description">Update Blog Post</p>
 
           <div className="users">
             <CreatePost createPost={updateBlogPost} post={post} loading={loading} id={id} />
