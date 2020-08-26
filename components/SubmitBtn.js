@@ -3,7 +3,8 @@ import { Button, Spinner } from "react-bootstrap";
 import PropTypes from 'prop-types'
 
 const styles = {
-  float: "right"
+  float: "right",
+  margin: '10px 0'
 };
 export function SubmitBtn({children ,loading}) {
 

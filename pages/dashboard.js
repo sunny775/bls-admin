@@ -207,19 +207,3 @@ export default function Dashboard() {
     </div>
   )
 }
-
-/*export async function getStaticProps(context) {
-  
-    try {
-      
-      return {
-        props: {result} 
-      }
-    } catch (error) {
-      console.log('errresponse:',error.response.data)
-      return {
-        props: {result: error.response.data} 
-      }
-    }
-
-}*/

@@ -1,25 +1,73 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { Image, Button } from "react-bootstrap";
+import { Image, Button, Card, CardDeck, CardColumns } from "react-bootstrap";
 import InfiniteScroll from "react-infinite-scroll-component";
+import Compressor from "compressorjs";
 import useAuth from "../../hooks/auth";
 import useBlog from "../../hooks/blog";
 import { NavBar } from "../../components/NavBar";
+import { SubmitBtn } from "../../components/SubmitBtn";
 
 export default function Transactions() {
-  const [posts, setPosts] = useState([]);
+  const [urls, setUrls] = useState([]);
+  const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
   const { signOut, data, error } = useAuth();
-  const { getAllPosts, hasMore } = useBlog();
+  const {
+    getAllImgages,
+    hasMoreImages,
+    uploadBlogImage,
+    loading,
+    deleteImage,
+  } = useBlog();
   useEffect(() => {
-    getAllPosts().then((res) => setPosts(res));
+    getAllImgages().then((res) => setUrls(res));
   }, []);
 
+  const fileUpload = useRef();
+
   const next = () => {
-    getAllPosts().then((res) => setPosts([...posts, ...res]));
+    getAllImgages().then((res) => setUrls([...urls, ...res]));
   };
+
+  const openFileUpload = () => fileUpload.current.click();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    uploadBlogImage(file).then((res) => setUrls([res, ...urls]));
+  };
+  const handleDelete = (e) => {
+    deleteImage(e.fileName, e.id).then(()=> {
+        const remUrls = urls.filter(url => url.id !== e.id)
+        setUrls(remUrls);
+    })
+  }
+
   const uid = data && data.uid;
-  console.log(posts);
+
+  function handleImageChange(e) {
+    e.preventDefault();
+    let reader = new FileReader();
+    let file = e.target.files[0];
+
+    if (file) {
+      new Compressor(file, {
+        quality: 0.8,
+        maxWidth: 400,
+        success(result) {
+          reader.onloadend = () => {
+            setPreviewUrl(reader.result);
+          };
+          reader.readAsDataURL(result);
+          setFile(result);
+        },
+        error(err) {
+          console.log(err.message);
+        },
+      });
+    }
+  }
   return (
     <div className="container">
       <Head>
@@ -42,62 +90,67 @@ export default function Transactions() {
         ) : null}
 
         <div className="authorized">
-          <p className="description">All blog posts</p>
+          <p className="description">All blog Images</p>
 
-          <div style={{ padding: 10 }}>
-            <Button style={{ float: "right" }}>
-              <Link href="blog/addNew">
-                <a>+ create new</a>
-              </Link>
-            </Button>
-            <Button style={{ float: "left" }}>
-              <Link href="blog/blogImages">
-                <a> + Images</a>
-              </Link>
-            </Button>
+          <div className="preview" style={{ textAlign: "center", margin: 10 }}>
+            {previewUrl && <Image src={previewUrl} width={150} thumbnail />}
+          </div>
+          <div className="img-container">
+            <form onSubmit={handleSubmit}>
+              <input
+                style={{ display: "none" }}
+                accept="image/*"
+                id="contained-button-file"
+                type="file"
+                onChange={handleImageChange}
+                ref={fileUpload}
+              />
+              <div style={{ textAlign: "center" }}>
+                <Button onClick={openFileUpload}>
+                  <i className="material-icons">camera</i>
+                </Button>
+              </div>
+              {file && <SubmitBtn loading={loading}>Submit</SubmitBtn>}
+            </form>
           </div>
           <div className="blog-posts">
             <InfiniteScroll
               style={{ width: "100%", margin: "auto" }}
-              dataLength={posts.length}
+              dataLength={urls.length}
               next={next}
-              hasMore={hasMore}
+              hasMore={hasMoreImages}
               loader={<h4 style={{ textAlign: "center" }}>Loading...</h4>}
               endMessage={
                 <p style={{ textAlign: "center" }}>
-                  <b>{posts.length ? "You have seen it all" : null}</b>
+                  <b>{urls.length ? "You have seen it all" : null}</b>
                 </p>
               }
             >
-              {posts.map((e, i) => (
-                <div key={e.id}>
-                  <div className="shadow-sm transaction-card">
-                    <div className="details">
-                      <div>{new Date(e.date).toDateString()}</div>
-                      <div>
-                        Author: <strong>{e.author}</strong>
-                      </div>
-                      <h3>{e.title}</h3>
-                      <div>
-                        {e.img && <Image src={e.img} thumbnail width={60} />}
-                      </div>
-                      <div>{e.body}</div>
-                      <div>
-                        <Link href={`/blog/${e.id}`}>
-                          <a className="edit-btn badge">
-                            Edit <i className="material-icons">edit</i>
-                          </a>
-                        </Link>
-                      </div>
-                      <div>
-                        <span className="delete-btn badge">
-                          Delete <i className="material-icons">delete</i>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <div className="images">
+                <CardColumns>
+                  {urls.map((e) => (
+                    <Card key={e.id} style={{width: '18rem'}}>
+                      <Card.Img variant="top" src={e.url} />
+                      <Card.Body>
+                        <Card.Text>{e.url}</Card.Text>
+                        <Card.Text>
+                          <small className="text-muted">
+                            {new Date(e.date).toDateString()}
+                          </small>
+                        </Card.Text>
+                      </Card.Body>
+                      <Card.Footer>
+                        <Button
+                          variant="danger"
+                          onClick={() => handleDelete(e)}
+                        >
+                          DELETE
+                        </Button>
+                      </Card.Footer>
+                    </Card>
+                  ))}
+                </CardColumns>
+              </div>
             </InfiniteScroll>
           </div>
         </div>
@@ -177,48 +230,14 @@ export default function Transactions() {
           display: ${data && data.uid ? "block" : "none"};
         }
 
-        .transaction-card {
-          min-width: 100%;
-          margin: 50px 0;
-          padding: 20px 20px 60px 20px;
-          position: relative;
-        }
-
-        .details div {
-          margin: 10px 0;
-          letter-spacing: 1px;
-        }
-
         .logout {
           position: fixed;
           top: 15px;
           right: 15px;
         }
-        .blog-posts {
-          min-width: 100%;
-          margin: auto !important;
-        }
-        .edit-btn {
-          position: absolute;
-          right: 10px;
-          top: 10px;
-          margin: 10px;
-          cursor: pointer;
-        }
-        .delete-btn {
-          position: absolute;
-          right: 10px;
-          margin: 10px;
-          bottom: 10px;
-          cursor: pointer;
-        }
-        .edit-btn:hover,
-        .edit-btn:focus {
-          color: #0070f3;
-        }
-        .delete-btn:hover,
-        .delete-btn:focus {
-          color: red;
+
+        .images {
+          margin: 50px 0 !important;
         }
 
         @media (max-width: 600px) {

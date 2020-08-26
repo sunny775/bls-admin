@@ -2,24 +2,24 @@ import { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { Image, Button } from "react-bootstrap";
-import InfiniteScroll from "react-infinite-scroll-component";
+import {useRouter} from 'next/router'
 import useAuth from "../../hooks/auth";
 import useBlog from "../../hooks/blog";
 import { NavBar } from "../../components/NavBar";
+import {CreatePost} from '../../components/blog/createNew'
+import { app } from "../../config/firebase";
 
-export default function Transactions() {
-  const [posts, setPosts] = useState([]);
+const {db} = app;
+
+export default function EditPost({post}) {
+  
   const { signOut, data, error } = useAuth();
-  const { getAllPosts, hasMore } = useBlog();
-  useEffect(() => {
-    getAllPosts().then((res) => setPosts(res));
-  }, []);
+  const { updateBlogPost, loading } = useBlog();
+  const router = useRouter()
 
-  const next = () => {
-    getAllPosts().then((res) => setPosts([...posts, ...res]));
-  };
   const uid = data && data.uid;
-  console.log(posts);
+  const {id} = router.query
+
   return (
     <div className="container">
       <Head>
@@ -42,63 +42,10 @@ export default function Transactions() {
         ) : null}
 
         <div className="authorized">
-          <p className="description">All blog posts</p>
+          <p className="description">Create New Blog Post</p>
 
-          <div style={{ padding: 10 }}>
-            <Button style={{ float: "right" }}>
-              <Link href="blog/addNew">
-                <a>+ create new</a>
-              </Link>
-            </Button>
-            <Button style={{ float: "left" }}>
-              <Link href="blog/blogImages">
-                <a> + Images</a>
-              </Link>
-            </Button>
-          </div>
-          <div className="blog-posts">
-            <InfiniteScroll
-              style={{ width: "100%", margin: "auto" }}
-              dataLength={posts.length}
-              next={next}
-              hasMore={hasMore}
-              loader={<h4 style={{ textAlign: "center" }}>Loading...</h4>}
-              endMessage={
-                <p style={{ textAlign: "center" }}>
-                  <b>{posts.length ? "You have seen it all" : null}</b>
-                </p>
-              }
-            >
-              {posts.map((e, i) => (
-                <div key={e.id}>
-                  <div className="shadow-sm transaction-card">
-                    <div className="details">
-                      <div>{new Date(e.date).toDateString()}</div>
-                      <div>
-                        Author: <strong>{e.author}</strong>
-                      </div>
-                      <h3>{e.title}</h3>
-                      <div>
-                        {e.img && <Image src={e.img} thumbnail width={60} />}
-                      </div>
-                      <div>{e.body}</div>
-                      <div>
-                        <Link href={`/blog/${e.id}`}>
-                          <a className="edit-btn badge">
-                            Edit <i className="material-icons">edit</i>
-                          </a>
-                        </Link>
-                      </div>
-                      <div>
-                        <span className="delete-btn badge">
-                          Delete <i className="material-icons">delete</i>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </InfiniteScroll>
+          <div className="users">
+            <CreatePost createPost={updateBlogPost} post={post} loading={loading} id={id} />
           </div>
         </div>
       </main>
@@ -178,10 +125,10 @@ export default function Transactions() {
         }
 
         .transaction-card {
-          min-width: 100%;
-          margin: 50px 0;
-          padding: 20px 20px 60px 20px;
-          position: relative;
+          width: 100%;
+          margin: 30px 0;
+          padding: 20px;
+          border: 1px solid #eaeaea;
         }
 
         .details div {
@@ -189,36 +136,23 @@ export default function Transactions() {
           letter-spacing: 1px;
         }
 
+        .transaction-card:hover,
+        .transaction-card:focus,
+        .transaction-card:active {
+          color: #0070f3;
+        }
+
         .logout {
           position: fixed;
           top: 15px;
           right: 15px;
         }
-        .blog-posts {
-          min-width: 100%;
-          margin: auto !important;
+        .badge.badge-info {
+          color: white;
         }
-        .edit-btn {
-          position: absolute;
-          right: 10px;
-          top: 10px;
-          margin: 10px;
+        .status.badge {
           cursor: pointer;
-        }
-        .delete-btn {
-          position: absolute;
-          right: 10px;
-          margin: 10px;
-          bottom: 10px;
-          cursor: pointer;
-        }
-        .edit-btn:hover,
-        .edit-btn:focus {
-          color: #0070f3;
-        }
-        .delete-btn:hover,
-        .delete-btn:focus {
-          color: red;
+          color: white;
         }
 
         @media (max-width: 600px) {
@@ -238,4 +172,17 @@ export default function Transactions() {
       `}</style>
     </div>
   );
+}
+
+export const getServerSideProps = async ({ query }) => {
+  const post = await db
+  .collection("blog")
+  .doc(query.id)
+  .get()
+  .then((res) => ({ id: res.id, ...res.data() }));
+return {
+    props: {
+      post
+    }
+  }
 }
