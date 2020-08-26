@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { Image, Button } from "react-bootstrap";
+import { Button, Spinner } from "react-bootstrap";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Markdown from "markdown-to-jsx";
 import useAuth from "../../hooks/auth";
@@ -11,7 +11,7 @@ import { NavBar } from "../../components/NavBar";
 export default function Transactions() {
   const [posts, setPosts] = useState([]);
   const { signOut, data, error } = useAuth();
-  const { getAllPosts, hasMore } = useBlog();
+  const { getAllPosts, hasMore, deleteBlogPost, deleting } = useBlog();
   useEffect(() => {
     getAllPosts().then((res) => setPosts(res));
   }, []);
@@ -20,7 +20,13 @@ export default function Transactions() {
     getAllPosts().then((res) => setPosts([...posts, ...res]));
   };
   const uid = data && data.uid;
-  console.log(posts);
+
+  const handleDelete = (id) => {
+    deleteBlogPost(id).then(() => {
+      const remPosts = posts.filter((e) => e.id !== id);
+      setPosts(remPosts);
+    });
+  };
   return (
     <div className="container">
       <Head>
@@ -88,9 +94,24 @@ export default function Transactions() {
                         </Link>
                       </div>
                       <div>
-                        <span className="delete-btn badge">
-                          Delete <i className="material-icons">delete</i>
-                        </span>
+                        {deleting === e.id ? (
+                          <Button variant="secondary" disabled style={{float: 'right'}}>
+                            <Spinner
+                              as="span"
+                              animation="border"
+                              role="status"
+                              aria-hidden="true"
+                            />
+                            deleting...
+                          </Button>
+                        ) : (
+                          <span
+                            className="delete-btn badge"
+                            onClick={() => handleDelete(e.id)}
+                          >
+                            Delete <i className="material-icons">delete</i>
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -217,18 +238,6 @@ export default function Transactions() {
         .delete-btn:hover,
         .delete-btn:focus {
           color: red;
-        }
-
-        .markdownstyles a {
-          color: #1a0dab;
-        }
-        .markdownstyles a:visited {
-          color: #609;
-        }
-
-        .markdownstyles img {
-          padding-top: 1rem;
-          width: 60%;
         }
 
         @media (max-width: 600px) {
